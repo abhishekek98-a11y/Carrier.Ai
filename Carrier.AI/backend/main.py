@@ -23,7 +23,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Include all routers
+# Include all API routers
 app.include_router(auth_router.router)
 app.include_router(profile_router.router)
 app.include_router(resume_router.router)
@@ -35,23 +35,11 @@ app.include_router(dashboard_router.router)
 # Create uploads directory
 os.makedirs(os.path.join(os.path.dirname(__file__), "uploads"), exist_ok=True)
 
-@app.get("/")
-def root():
-    return {
-        "name": "CareerAI API",
-        "version": "1.0.0",
-        "description": "AI-Powered Career Guidance & Skill Gap Analysis System",
-        "endpoints": {
-            "auth": "/api/auth",
-            "profile": "/api/profile",
-            "resume": "/api/resume",
-            "career": "/api/career",
-            "roadmap": "/api/roadmap",
-            "chatbot": "/api/chatbot",
-            "dashboard": "/api/dashboard"
-        }
-    }
-
 @app.get("/health")
 def health_check():
     return {"status": "healthy"}
+
+# Serve frontend static files if available
+frontend_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "frontend")
+if os.path.exists(frontend_dir):
+    app.mount("/", StaticFiles(directory=frontend_dir, html=True), name="frontend")

@@ -4,32 +4,45 @@ import { showToast, createScoreGauge, createSkillTags } from './utils.js';
 
 export function renderResumePage(container) {
     container.innerHTML = `
-        <div class="max-w-4xl mx-auto animate-fadeIn">
-            <h1 class="font-heading text-3xl font-bold mb-6 flex items-center gap-3">📄 Resume Analyzer</h1>
-            
-            <div class="glass-card p-8 mb-6" id="upload-section">
-                <div id="upload-zone" class="upload-zone p-12 text-center">
-                    <div class="text-5xl mb-4">📁</div>
-                    <p class="text-lg font-medium mb-2">Drag & drop your resume (PDF)</p>
-                    <p class="text-sm text-gray-400 mb-4">or click to browse</p>
-                    <input type="file" id="resume-file" accept=".pdf" class="hidden">
-                    <button type="button" id="browse-btn" class="btn-secondary text-sm px-6 py-2">Browse Files</button>
+        <div class="max-w-4xl mx-auto space-y-6 animate-fadeIn">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="font-heading text-3xl font-bold flex items-center gap-3">
+                        <span class="icon-badge icon-badge-emerald">📄</span> Resume Analyzer
+                    </h1>
+                    <p class="text-gray-400 text-sm mt-1">Upload your resume for AI-powered ATS optimization and feedback</p>
                 </div>
-                <div id="file-info" class="hidden mt-4 flex items-center justify-between p-4 bg-white/5 rounded-lg">
+            </div>
+            
+            <div class="glass-card p-6 md:p-8" id="upload-section">
+                <div id="upload-zone" class="upload-zone p-10 md:p-14 text-center group">
+                    <div class="w-16 h-16 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-400 text-3xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                        📁
+                    </div>
+                    <p class="text-lg font-bold text-white mb-1">Drag & drop your resume PDF</p>
+                    <p class="text-xs text-gray-400 mb-6">Supports standard PDF resumes up to 10MB</p>
+                    <input type="file" id="resume-file" accept=".pdf" class="hidden">
+                    <button type="button" id="browse-btn" class="btn-secondary text-sm px-6 py-2.5 rounded-xl font-medium">Browse Computer</button>
+                </div>
+
+                <div id="file-info" class="hidden mt-5 p-4 bg-white/5 border border-white/10 rounded-xl flex items-center justify-between">
                     <div class="flex items-center gap-3">
-                        <span class="text-2xl">📄</span>
+                        <div class="icon-badge icon-badge-emerald">📄</div>
                         <div>
-                            <p id="file-name" class="font-medium text-sm"></p>
+                            <p id="file-name" class="font-semibold text-sm text-white"></p>
                             <p id="file-size" class="text-xs text-gray-400"></p>
                         </div>
                     </div>
-                    <button type="button" id="upload-btn" class="btn-primary text-sm px-6 py-2">Analyze Resume</button>
+                    <button type="button" id="upload-btn" class="btn-primary text-sm px-6 py-2.5 rounded-xl font-semibold">
+                        Analyze Resume
+                    </button>
                 </div>
-                <div id="upload-progress" class="hidden mt-4">
-                    <div class="progress-bar-container h-2">
-                        <div id="progress-bar" class="progress-bar-fill h-2" style="width:0%"></div>
+
+                <div id="upload-progress" class="hidden mt-5 space-y-2">
+                    <div class="progress-bar-container h-2.5 bg-white/10 rounded-full overflow-hidden">
+                        <div id="progress-bar" class="progress-bar-fill h-full bg-gradient-to-r from-blue-500 to-emerald-400 rounded-full transition-all duration-300" style="width:0%"></div>
                     </div>
-                    <p class="text-xs text-gray-400 mt-2 text-center">Analyzing your resume with AI...</p>
+                    <p class="text-xs text-gray-400 text-center font-medium">Analyzing resume structure, ATS keywords, and skills...</p>
                 </div>
             </div>
 
@@ -45,7 +58,7 @@ export function renderResumePage(container) {
     browseBtn.addEventListener('click', () => fileInput.click());
     uploadZone.addEventListener('click', (e) => { if (e.target === uploadZone || e.target.parentElement === uploadZone) fileInput.click(); });
 
-    // Drag and drop
+    // Drag and drop events
     uploadZone.addEventListener('dragover', (e) => { e.preventDefault(); uploadZone.classList.add('drag-active'); });
     uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag-active'));
     uploadZone.addEventListener('drop', (e) => {
@@ -71,7 +84,7 @@ export function renderResumePage(container) {
 
         const btn = document.getElementById('upload-btn');
         btn.disabled = true;
-        btn.innerHTML = '<span class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>';
+        btn.innerHTML = '<span class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2"></span> Analyzing...';
         document.getElementById('upload-progress').classList.remove('hidden');
 
         const bar = document.getElementById('progress-bar');
@@ -84,7 +97,7 @@ export function renderResumePage(container) {
             const data = await api.upload('/resume/upload', formData);
             clearInterval(progressTimer);
             bar.style.width = '100%';
-            setTimeout(() => showAnalysisResults(data), 500);
+            setTimeout(() => showAnalysisResults(data), 400);
             showToast('Resume analyzed successfully!', 'success');
         } catch {
             clearInterval(progressTimer);
@@ -108,45 +121,70 @@ async function loadExistingAnalysis() {
 function showAnalysisResults(data) {
     const ct = document.getElementById('analysis-results');
     ct.innerHTML = `
-        <div class="animate-slideUp">
-            <h2 class="font-heading text-2xl font-bold mb-4 flex items-center gap-2">📊 Analysis Results</h2>
+        <div class="space-y-6 animate-slideUp">
+            <h2 class="font-heading text-2xl font-bold text-white flex items-center gap-2">
+                <span>📊</span> Comprehensive Analysis
+            </h2>
             
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                <div class="glass-card p-6 flex justify-center">
-                    ${createScoreGauge(Math.round(data.resume_score || 0), 'Resume Score', '140px')}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="glass-card p-6 flex flex-col items-center justify-center text-center">
+                    ${createScoreGauge(Math.round(data.resume_score || 0), 'Overall Resume Quality', '140px')}
                 </div>
-                <div class="glass-card p-6 flex justify-center">
-                    ${createScoreGauge(Math.round(data.ats_score || 0), 'ATS Score', '140px')}
+                <div class="glass-card p-6 flex flex-col items-center justify-center text-center">
+                    ${createScoreGauge(Math.round(data.ats_score || 0), 'ATS Compatibility', '140px')}
                 </div>
             </div>
 
-            <div class="glass-card p-6 mb-6">
-                <h3 class="font-heading text-lg font-semibold mb-3">💻 Extracted Skills</h3>
+            <div class="glass-card p-6">
+                <h3 class="font-heading text-lg font-bold text-white mb-4 flex items-center gap-2">
+                    <span>💻</span> Identified Technical Skills
+                </h3>
                 <div class="flex flex-wrap gap-2">
                     ${createSkillTags(data.extracted_skills || [], 'success')}
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="glass-card p-6">
-                    <h3 class="font-heading text-lg font-semibold mb-3">✅ Strengths</h3>
-                    <ul class="space-y-2">
-                        ${(data.strengths || []).map(s => `<li class="flex items-start gap-2 text-sm text-gray-300"><span class="text-green-400 mt-0.5">✓</span>${s}</li>`).join('') || '<li class="text-gray-500 text-sm">Upload a resume to see strengths</li>'}
+                    <h3 class="font-heading text-lg font-bold text-emerald-400 mb-4 flex items-center gap-2">
+                        <span>✅</span> Key Strengths
+                    </h3>
+                    <ul class="space-y-2.5">
+                        ${(data.strengths || []).map(s => `
+                            <li class="flex items-start gap-2.5 text-sm text-gray-300">
+                                <span class="text-emerald-400 font-bold mt-0.5">✓</span>
+                                <span>${s}</span>
+                            </li>
+                        `).join('') || '<li class="text-gray-500 text-sm">No specific strengths documented.</li>'}
                     </ul>
                 </div>
                 <div class="glass-card p-6">
-                    <h3 class="font-heading text-lg font-semibold mb-3">⚠️ Areas for Improvement</h3>
-                    <ul class="space-y-2">
-                        ${(data.weaknesses || []).map(s => `<li class="flex items-start gap-2 text-sm text-gray-300"><span class="text-yellow-400 mt-0.5">!</span>${s}</li>`).join('') || '<li class="text-gray-500 text-sm">No issues found</li>'}
+                    <h3 class="font-heading text-lg font-bold text-amber-400 mb-4 flex items-center gap-2">
+                        <span>⚠️</span> Areas for Growth
+                    </h3>
+                    <ul class="space-y-2.5">
+                        ${(data.weaknesses || []).map(s => `
+                            <li class="flex items-start gap-2.5 text-sm text-gray-300">
+                                <span class="text-amber-400 font-bold mt-0.5">!</span>
+                                <span>${s}</span>
+                            </li>
+                        `).join('') || '<li class="text-gray-500 text-sm">No weaknesses detected.</li>'}
                     </ul>
                 </div>
             </div>
 
             ${(data.suggestions || []).length > 0 ? `
             <div class="glass-card p-6">
-                <h3 class="font-heading text-lg font-semibold mb-3">💡 Suggestions</h3>
-                <ul class="space-y-2">
-                    ${data.suggestions.map(s => `<li class="flex items-start gap-2 text-sm text-gray-300"><span class="text-blue-400">→</span>${s}</li>`).join('')}
+                <h3 class="font-heading text-lg font-bold text-blue-400 mb-4 flex items-center gap-2">
+                    <span>💡</span> Recommended Action Steps
+                </h3>
+                <ul class="space-y-2.5">
+                    ${data.suggestions.map(s => `
+                        <li class="flex items-start gap-2.5 text-sm text-gray-300">
+                            <span class="text-blue-400 font-bold">→</span>
+                            <span>${s}</span>
+                        </li>
+                    `).join('')}
                 </ul>
             </div>` : ''}
         </div>
