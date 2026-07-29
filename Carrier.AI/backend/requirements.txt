@@ -1,0 +1,11 @@
+fastapi
+uvicorn[standard]
+sqlalchemy
+python-jose[cryptography]
+passlib[bcrypt]
+python-multipart
+PyPDF2
+scikit-learn
+numpy
+pydantic
+aiofiles
